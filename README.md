@@ -1,6 +1,7 @@
 # TurtleBot3 Simulator on ROS 2 Humble
 
 This workspace runs the ROS 2 Humble TurtleBot3 Gazebo simulation in Docker.
+The default simulation is TurtleBot3 Waffle with an Intel RealSense R200 RGB/depth camera configuration.
 CycloneDDS is used as the ROS middleware implementation.
 
 ## Requirements
@@ -18,11 +19,30 @@ CycloneDDS is used as the ROS middleware implementation.
 
 ![Quick start demo](docs/assets/quick-start.gif)
 
-The default TurtleBot3 model is `burger`. To use another model:
+The Gazebo model uses the TurtleBot3 Waffle built-in Intel RealSense R200 RGB camera and adds a depth sensor aligned with the R200 depth frame.
+
+To visualize the robot model, LiDAR scan, RGB image, and depth image in RViz, start the Gazebo simulation first and then run this from another terminal:
 
 ```bash
-TURTLEBOT3_MODEL=waffle_pi ./scripts/run-gazebo.sh
+./scripts/run-rviz.sh
 ```
+
+## Published Interfaces
+
+Expected ROS 2 topics:
+
+- `/camera/image_raw`
+- `/camera/camera_info`
+- `/camera/depth/image_raw`
+- `/camera/depth/camera_info`
+- `/camera/depth/points`
+- `/tf_static`
+
+Camera TF frames are provided by the TurtleBot3 Waffle URDF:
+
+- `base_link` -> `camera_link`
+- `camera_link` -> `camera_rgb_frame`
+- `camera_link` -> `camera_depth_frame`
 
 ## Useful Commands
 
@@ -35,7 +55,7 @@ Open a shell inside the container:
 Launch the Gazebo world manually:
 
 ```bash
-docker compose run --rm sim ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+docker compose run --rm sim ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
 ```
 
 Launch an empty world:
@@ -69,11 +89,22 @@ CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
 |       `-- quick-start.gif
 |-- scripts/
 |   |-- build.sh
-|   |-- create-quick-start-gif.sh
 |   |-- run-gazebo.sh
+|   |-- run-rviz.sh
 |   `-- shell.sh
 |-- src/
-|   `-- .gitkeep
+|   `-- turtlebot3_stereo_sim/
+|       |-- CMakeLists.txt
+|       |-- package.xml
+|       |-- launch/
+|       |   |-- turtlebot3_stereo_rviz.launch.py
+|       |   `-- turtlebot3_stereo_world.launch.py
+|       |-- models/
+|       |   `-- turtlebot3_waffle_stereo/
+|       |       |-- model.config
+|       |       `-- model.sdf
+|       `-- rviz/
+|           `-- turtlebot3_stereo.rviz
 |-- .dockerignore
 |-- .gitignore
 |-- LICENSE
@@ -93,6 +124,7 @@ Third-party software installed by the Docker image, including ROS 2, TurtleBot3,
 # ROS 2 Humble TurtleBot3 Simulator
 
 このワークスペースは、ROS 2 Humble の TurtleBot3 Gazebo simulation を Docker 上で起動します。
+デフォルトの simulation は Intel RealSense R200 RGB/depth camera 構成の TurtleBot3 Waffle です。
 ROS middleware implementation には CycloneDDS を使います。
 
 ## 必要環境
@@ -110,11 +142,30 @@ ROS middleware implementation には CycloneDDS を使います。
 
 ![Quick start demo](docs/assets/quick-start.gif)
 
-turtlebot3 burger以外のmodel を使う場合:
+Gazebo model は TurtleBot3 Waffle 標準の Intel RealSense R200 RGB camera を使い、R200 の depth frame に合わせた depth sensor を追加します。
+
+robot model、LiDAR scan、RGB image、depth image を RViz で可視化する場合は、先に Gazebo simulation を起動し、別ターミナルで次を実行します。
 
 ```bash
-TURTLEBOT3_MODEL=waffle_pi ./scripts/run-gazebo.sh
+./scripts/run-rviz.sh
 ```
+
+## 公開インターフェース
+
+期待する ROS 2 topics:
+
+- `/camera/image_raw`
+- `/camera/camera_info`
+- `/camera/depth/image_raw`
+- `/camera/depth/camera_info`
+- `/camera/depth/points`
+- `/tf_static`
+
+camera TF frames は TurtleBot3 Waffle URDF から publish されます。
+
+- `base_link` -> `camera_link`
+- `camera_link` -> `camera_rgb_frame`
+- `camera_link` -> `camera_depth_frame`
 
 ## 便利なコマンド
 
@@ -127,7 +178,7 @@ TURTLEBOT3_MODEL=waffle_pi ./scripts/run-gazebo.sh
 Gazebo world を手動起動する:
 
 ```bash
-docker compose run --rm sim ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+docker compose run --rm sim ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
 ```
 
 空の world を起動する:
@@ -156,11 +207,22 @@ docker compose run --rm sim ros2 run turtlebot3_teleop teleop_keyboard
 |       `-- quick-start.gif
 |-- scripts/
 |   |-- build.sh
-|   |-- create-quick-start-gif.sh
 |   |-- run-gazebo.sh
+|   |-- run-rviz.sh
 |   `-- shell.sh
 |-- src/
-|   `-- .gitkeep
+|   `-- turtlebot3_stereo_sim/
+|       |-- CMakeLists.txt
+|       |-- package.xml
+|       |-- launch/
+|       |   |-- turtlebot3_stereo_rviz.launch.py
+|       |   `-- turtlebot3_stereo_world.launch.py
+|       |-- models/
+|       |   `-- turtlebot3_waffle_stereo/
+|       |       |-- model.config
+|       |       `-- model.sdf
+|       `-- rviz/
+|           `-- turtlebot3_stereo.rviz
 |-- .dockerignore
 |-- .gitignore
 |-- LICENSE

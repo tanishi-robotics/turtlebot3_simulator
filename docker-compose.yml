@@ -18,11 +18,11 @@ services:
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
       CYCLONEDDS_URI: file:///etc/cyclonedds/cyclonedds.xml
       ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
-      TURTLEBOT3_MODEL: ${TURTLEBOT3_MODEL:-burger}
+      TURTLEBOT3_MODEL: ${TURTLEBOT3_MODEL:-waffle}
       GAZEBO_MODEL_PATH: /opt/ros/humble/share/turtlebot3_gazebo/models:/usr/share/gazebo-11/models
       GAZEBO_MODEL_DATABASE_URI: ""
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - ./src:/ros2_ws/src:rw
       - ./docker/cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
-    command: ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+    command: ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
