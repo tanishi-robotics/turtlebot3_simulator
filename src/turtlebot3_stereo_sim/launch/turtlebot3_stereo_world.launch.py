@@ -10,18 +10,23 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     pkg_gazebo_ros = get_package_share_directory('gazebo_ros')
-    pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')
     pkg_stereo_sim = get_package_share_directory('turtlebot3_stereo_sim')
+    pkg_turtlebot3_gazebo = get_package_share_directory('turtlebot3_gazebo')
+    small_house_world_path = os.environ.get(
+        'SMALL_HOUSE_WORLD_PATH',
+        '/opt/aws-robomaker-small-house-world',
+    )
     turtlebot3_model = os.environ.get('TURTLEBOT3_MODEL', 'waffle')
 
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    x_pose = LaunchConfiguration('x_pose', default='-2.0')
-    y_pose = LaunchConfiguration('y_pose', default='-0.5')
+    x_pose = LaunchConfiguration('x_pose', default='-3.5')
+    y_pose = LaunchConfiguration('y_pose', default='-4.5')
+    yaw_pose = LaunchConfiguration('yaw_pose', default='1.58')
 
     world = os.path.join(
-        pkg_turtlebot3_gazebo,
+        small_house_world_path,
         'worlds',
-        'turtlebot3_world.world',
+        'small_house.world',
     )
 
     model = os.path.join(
@@ -73,8 +78,22 @@ def generate_launch_description():
             '-x', x_pose,
             '-y', y_pose,
             '-z', '0.01',
+            '-Y', yaw_pose,
         ],
         output='screen',
+    )
+
+    cmd_vel_watchdog_cmd = Node(
+        package='turtlebot3_stereo_sim',
+        executable='cmd_vel_watchdog.py',
+        name='cmd_vel_watchdog',
+        output='screen',
+        parameters=[{
+            'input_topic': 'cmd_vel',
+            'output_topic': 'cmd_vel_safe',
+            'timeout_sec': 0.3,
+            'publish_rate_hz': 20.0,
+        }],
     )
 
     ld = LaunchDescription()
@@ -82,5 +101,6 @@ def generate_launch_description():
     ld.add_action(gzclient_cmd)
     ld.add_action(robot_state_publisher_cmd)
     ld.add_action(spawn_turtlebot_cmd)
+    ld.add_action(cmd_vel_watchdog_cmd)
 
     return ld

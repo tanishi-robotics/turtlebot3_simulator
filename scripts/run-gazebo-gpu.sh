@@ -7,4 +7,7 @@ if command -v xhost >/dev/null 2>&1; then
   xhost +local:docker >/dev/null
 fi
 
-docker compose -f docker/docker-compose.yml up sim
+docker compose \
+  -f docker/docker-compose.yml \
+  -f docker/docker-compose.gpu.yml \
+  up sim
