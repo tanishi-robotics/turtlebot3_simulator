@@ -7,4 +7,4 @@ if command -v xhost >/dev/null 2>&1; then
   xhost +local:docker >/dev/null
 fi
 
-docker compose -f docker/docker-compose.yml up sim
+docker compose -f docker/docker-compose.yml run --rm sim ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_rviz.launch.py

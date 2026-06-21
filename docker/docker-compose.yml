@@ -1,8 +1,8 @@
 services:
   sim:
     build:
-      context: .
-      dockerfile: Dockerfile
+      context: ..
+      dockerfile: docker/Dockerfile
     image: turtlebot3-sim:humble
     container_name: turtlebot3-sim-humble
     network_mode: host
@@ -17,12 +17,13 @@ services:
       QT_XCB_GL_INTEGRATION: none
       RMW_IMPLEMENTATION: rmw_cyclonedds_cpp
       CYCLONEDDS_URI: file:///etc/cyclonedds/cyclonedds.xml
-      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
-      TURTLEBOT3_MODEL: ${TURTLEBOT3_MODEL:-burger}
-      GAZEBO_MODEL_PATH: /opt/ros/humble/share/turtlebot3_gazebo/models:/usr/share/gazebo-11/models
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:?ROS_DOMAIN_ID must be set on the host}
+      TURTLEBOT3_MODEL: waffle
+      SMALL_HOUSE_WORLD_PATH: /opt/aws-robomaker-small-house-world
+      GAZEBO_MODEL_PATH: /opt/aws-robomaker-small-house-world/models:/opt/ros/humble/share/turtlebot3_gazebo/models:/usr/share/gazebo-11/models
       GAZEBO_MODEL_DATABASE_URI: ""
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
-      - ./src:/ros2_ws/src:rw
-      - ./docker/cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
-    command: ros2 launch turtlebot3_gazebo turtlebot3_world.launch.py
+      - ../src:/ros2_ws/src:rw
+      - ./cyclonedds.xml:/etc/cyclonedds/cyclonedds.xml:ro
+    command: ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
