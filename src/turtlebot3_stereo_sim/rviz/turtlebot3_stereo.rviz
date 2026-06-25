@@ -10,7 +10,7 @@ Panels:
         - /R200 RGB Image1
         - /R200 Depth Image1
       Splitter Ratio: 0.5
-    Tree Height: 183
+    Tree Height: 216
   - Class: rviz_common/Views
     Expanded:
       - /Current View1
@@ -247,10 +247,52 @@ Visualization Manager:
         Reliability Policy: Reliable
         Value: /camera/depth/image_raw
       Value: true
+    - Class: rviz_default_plugins/Image
+      Enabled: true
+      Max Value: 1
+      Median window: 5
+      Min Value: 0
+      Name: Image
+      Normalize Range: true
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /viplanner/semantic/image
+      Value: true
+    - Alpha: 1
+      Buffer Length: 1
+      Class: rviz_default_plugins/Path
+      Color: 25; 255; 0
+      Enabled: true
+      Head Diameter: 0.30000001192092896
+      Head Length: 0.20000000298023224
+      Length: 0.30000001192092896
+      Line Style: Lines
+      Line Width: 0.029999999329447746
+      Name: Path
+      Offset:
+        X: 0
+        Y: 0
+        Z: 0
+      Pose Color: 255; 85; 255
+      Pose Style: None
+      Radius: 0.029999999329447746
+      Shaft Diameter: 0.10000000149011612
+      Shaft Length: 0.10000000149011612
+      Topic:
+        Depth: 5
+        Durability Policy: Volatile
+        Filter size: 10
+        History Policy: Keep Last
+        Reliability Policy: Reliable
+        Value: /viplanner/path
+      Value: true
   Enabled: true
   Global Options:
     Background Color: 32; 34; 38
-    Fixed Frame: base_link
+    Fixed Frame: odom
     Frame Rate: 30
   Name: root
   Tools:
@@ -284,25 +326,25 @@ Visualization Manager:
   Views:
     Current:
       Class: rviz_default_plugins/Orbit
-      Distance: 2.5
+      Distance: 4.499258041381836
       Enable Stereo Rendering:
         Stereo Eye Separation: 0.05999999865889549
         Stereo Focal Distance: 1
         Swap Stereo Eyes: false
         Value: false
       Focal Point:
-        X: 0
-        Y: 0
-        Z: 0.15000000596046448
+        X: -4.936173439025879
+        Y: -4.367213726043701
+        Z: 1.3148516416549683
       Focal Shape Fixed Size: true
       Focal Shape Size: 0.05000000074505806
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Pitch: 0.699999988079071
+      Pitch: 1.1297966241836548
       Target Frame: <Fixed Frame>
       Value: Orbit (rviz)
-      Yaw: 0.800000011920929
+      Yaw: 4.7163591384887695
     Saved: ~
 Window Geometry:
   Displays:
@@ -310,7 +352,9 @@ Window Geometry:
   Height: 1011
   Hide Left Dock: false
   Hide Right Dock: true
-  QMainWindow State: 000000ff00000000fd00000001000000000000019b0000039dfc0200000004fb0000001c0052003200300030002000520047004200200049006d006100670065010000003b000000bf0000002800fffffffb00000020005200320030003000200044006500700074006800200049006d0061006700650100000100000000bf0000002800fffffffb000000100044006900730070006c00610079007301000001c500000140000000c700fffffffb0000000a00560069006500770073010000030b000000cd000000a000ffffff0000059d0000039d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  Image:
+    collapsed: false
+  QMainWindow State: 000000ff00000000fd00000001000000000000019b0000039dfc0200000005fb0000001c0052003200300030002000520047004200200049006d006100670065010000003b000000b10000002800fffffffb00000020005200320030003000200044006500700074006800200049006d00610067006501000000f2000000b00000002800fffffffb0000000a0049006d00610067006501000001a8000000c90000002800fffffffb000000100044006900730070006c006100790073010000027700000161000000c700fffffffb0000000a005600690065007700730000000269000000a0000000a000ffffff0000059d0000039d00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   R200 Depth Image:
     collapsed: false
   R200 RGB Image:

@@ -1,20 +1,53 @@
 #!/bin/bash
 
 usage() {
-    echo "Usage: $(basename "$0") [SESSION_NAME]"
+    echo "Usage: $(basename "$0") [--cpu|--gpu] [SESSION_NAME]"
     echo
+    echo "  --cpu          Use CPU-only software rendering. This is the default."
+    echo "  --gpu          Use the NVIDIA GPU Docker Compose override."
     echo "  SESSION_NAME   Optional. Name of the tmux session to create or attach."
-    echo "                 If omitted, the default name 'default' will be used."
+    echo "                 If omitted, the default name 'tb3_simulator' will be used."
     echo
     echo "Examples:"
-    echo "  $(basename "$0") mysession    # Create or attach to 'mysession'"
-    echo "  $(basename "$0")              # Create or attach to 'tb3_simulator'"
-    exit 1
+    echo "  $(basename "$0") --gpu mysession  # Create or attach to 'mysession' using GPU rendering"
+    echo "  $(basename "$0") --cpu            # Create or attach to 'tb3_simulator' using CPU rendering"
 }
 
-if [[ "$1" == "-h" || "$1" == "--help" ]]; then
-    usage
-fi
+use_gpu=0
+session=tb3_simulator
+session_set=0
+
+while (($#)); do
+  case "$1" in
+    --cpu)
+      use_gpu=0
+      ;;
+    --gpu)
+      use_gpu=1
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    -*)
+      echo "Unknown option: $1" >&2
+      usage
+      exit 1
+      ;;
+    *)
+      if [ "$session_set" -eq 1 ]; then
+        echo "Session name is already set: $session" >&2
+        usage
+        exit 1
+      fi
+      session="$1"
+      session_set=1
+      ;;
+  esac
+  shift
+done
+
+: "${ROS_DOMAIN_ID:?ROS_DOMAIN_ID must be set on the host before starting Docker}"
 
 # sudo経由の実行を禁止（tmux関連の設定が反映されなくなるため）
 if [ "$SUDO_USER" ]; then
@@ -28,7 +61,13 @@ sudo sysctl -w net.core.rmem_max=2147483647  # 2 GiB, default is 208 KiB
 sudo sysctl -w net.ipv4.ipfrag_time=3  # in seconds, default is 30 s
 sudo sysctl -w net.ipv4.ipfrag_high_thresh=134217728  # 128 MiB, default is 256 KiB
 
-session=${1:-tb3_simulator}
+compose_files="-f docker/docker-compose.yml"
+render_mode="CPU"
+
+if [ "$use_gpu" -eq 1 ]; then
+  compose_files="$compose_files -f docker/docker-compose.gpu.yml"
+  render_mode="GPU"
+fi
 
 # セッション存在確認
 if tmux has-session -t "$session" 2>/dev/null; then
@@ -41,7 +80,12 @@ else
     \; select-layout tiled
 fi
 
-tmux send-keys -t 0 'cd ~/repo/turtlebot3_simulator && bash ./scripts/run-gazebo-gpu.sh' C-m
+tmux send-keys -t 0 'cd ~/repo/turtlebot3_simulator' C-m
+tmux send-keys -t 0 '# Docker起動コマンド' C-m
+tmux send-keys -t 0 'docker rm -f turtlebot3-sim-humble >/dev/null 2>&1 || true' C-m
+tmux send-keys -t 0 "docker compose $compose_files run -d --name turtlebot3-sim-humble sim sleep infinity" C-m
+tmux send-keys -t 0 "# Gazebo（$render_mode）起動コマンド" C-m
+tmux send-keys -t 0 'docker exec -ti turtlebot3-sim-humble bash -lc "source /opt/ros/humble/setup.bash && source /ros2_ws/install/setup.bash && ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py"' C-m
 
 tmux send-keys -t 1 'sleep 3' C-m
 tmux send-keys -t 1 'docker exec -ti turtlebot3-sim-humble bash' C-m

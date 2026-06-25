@@ -2,47 +2,39 @@
 
 This workspace runs a ROS 2 Humble TurtleBot3 Waffle Gazebo simulation in Docker.
 The default world is AWS RoboMaker Small House World from AWS Robotics, and the robot model includes an Intel RealSense R200 RGB/depth camera configuration.
-CycloneDDS is used as the ROS middleware implementation.
 
 ## Requirements
 
 - Docker
 - Docker Compose v2
+- tmux
 - Linux desktop environment with X11
 - `ROS_DOMAIN_ID` set on the host
+
+See `requirement.txt` for the host-side dependency list.
 
 ## Quick Start
 
 ```bash
+mkdir -p ~/repo
+cd ~/repo
+git clone https://github.com/<github-user-or-org>/turtlebot3_simulator.git
+cd turtlebot3_simulator
 export ROS_DOMAIN_ID=30
 ./scripts/build.sh
-./scripts/run-gazebo.sh
+./bringup.sh --cpu
 ```
 
-For NVIDIA GPU rendering, install NVIDIA Container Toolkit on the host and run:
+For NVIDIA GPU rendering, install NVIDIA Container Toolkit on the host and use:
 
 ```bash
 export ROS_DOMAIN_ID=30
-./scripts/run-gazebo-gpu.sh
+./bringup.sh --gpu
 ```
 
 ![Quick start demo](docs/assets/quick-start.gif)
 
-To visualize the robot model, LiDAR scan, RGB image, and depth image in RViz, start the Gazebo simulation first and then run this from another terminal:
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/run-rviz.sh
-```
-
-When Gazebo is running with GPU rendering, RViz can also be started with the GPU override:
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/run-rviz-gpu.sh
-```
-
-The Docker container uses the exact `ROS_DOMAIN_ID` value provided by the host environment. The run scripts stop with an error if it is not set.
+The Docker container uses the exact `ROS_DOMAIN_ID` value provided by the host environment. The run scripts stop with an error if it is not set. The bringup flow keeps the Docker container alive after Gazebo is stopped with Ctrl-C. Stop the container explicitly with `docker stop turtlebot3-sim-humble` when it is no longer needed.
 
 ## Published Interfaces
 
@@ -69,38 +61,11 @@ Camera TF frames are provided by the TurtleBot3 Waffle URDF:
 - `camera_link` -> `camera_rgb_frame`
 - `camera_link` -> `camera_depth_frame`
 
-## Useful Commands
-
-Open a shell inside the container:
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/shell.sh
-```
-
-Launch the default AWS Small House simulation manually:
-
-```bash
-docker compose -f docker/docker-compose.yml run --rm sim ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
-```
-
-Run keyboard teleoperation from another terminal:
-
-```bash
-docker compose -f docker/docker-compose.yml run --rm sim ros2 run turtlebot3_teleop teleop_keyboard
-```
-
-CycloneDDS is configured by:
-
-```bash
-RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
-```
-
 ## Directory Map
 
 ```text
 .
+|-- bringup.sh
 |-- docker/
 |   |-- Dockerfile
 |   |-- Dockerfile.dockerignore
@@ -113,9 +78,7 @@ CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
 |       `-- quick-start.gif
 |-- scripts/
 |   |-- build.sh
-|   |-- run-gazebo-gpu.sh
 |   |-- run-gazebo.sh
-|   |-- run-rviz-gpu.sh
 |   |-- run-rviz.sh
 |   `-- shell.sh
 |-- src/
@@ -135,14 +98,9 @@ CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
 |           `-- cmd_vel_watchdog.py
 |-- .gitignore
 |-- LICENSE
+|-- requirement.txt
 `-- README.md
 ```
-
-## Notes
-
-- The Docker image clones AWS RoboMaker Small House World from `aws-robotics/aws-robomaker-small-house-world` during build.
-- `./scripts/run-gazebo.sh` uses CPU-only software rendering.
-- `./scripts/run-gazebo-gpu.sh` enables the Docker Compose GPU override for NVIDIA GPU rendering.
 
 ## License
 
@@ -166,41 +124,35 @@ ROS middleware implementation には CycloneDDS を使います。
 
 - Docker
 - Docker Compose v2
+- tmux
 - X11 が使える Linux desktop environment
 - host 側で `ROS_DOMAIN_ID` が設定されていること
+
+host 側の依存関係一覧は `requirement.txt` を参照してください。
 
 ## クイックスタート
 
 ```bash
+mkdir -p ~/repo
+cd ~/repo
+git clone https://github.com/<github-user-or-org>/turtlebot3_simulator.git
+cd turtlebot3_simulator
 export ROS_DOMAIN_ID=30
 ./scripts/build.sh
-./scripts/run-gazebo.sh
+./bringup.sh --cpu
 ```
 
 NVIDIA GPU rendering を使う場合は、host に NVIDIA Container Toolkit を入れたうえで次を実行します。
 
 ```bash
 export ROS_DOMAIN_ID=30
-./scripts/run-gazebo-gpu.sh
+./bringup.sh --gpu
 ```
 
 ![Quick start demo](docs/assets/quick-start.gif)
 
-robot model、LiDAR scan、RGB image、depth image を RViz で可視化する場合は、先に Gazebo simulation を起動し、別ターミナルで次を実行します。
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/run-rviz.sh
-```
-
-Gazebo を GPU rendering で起動している場合は、RViz も GPU override 付きで起動できます。
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/run-rviz-gpu.sh
-```
-
 Docker container 内の `ROS_DOMAIN_ID` は、host 環境変数の値に固定されます。未設定の場合、起動スクリプトはエラーで停止します。
+bringup 経由では Gazebo を Ctrl-C で停止しても Docker container は起動したまま残ります。不要になったら `docker stop turtlebot3-sim-humble` で明示的に停止してください。
 
 ## 公開インターフェース
 
@@ -227,38 +179,11 @@ camera TF frames は TurtleBot3 Waffle URDF から publish されます。
 - `camera_link` -> `camera_rgb_frame`
 - `camera_link` -> `camera_depth_frame`
 
-## 便利なコマンド
-
-コンテナ内の shell を開く:
-
-```bash
-export ROS_DOMAIN_ID=30
-./scripts/shell.sh
-```
-
-default の AWS Small House simulation を手動起動する:
-
-```bash
-docker compose -f docker/docker-compose.yml run --rm sim ros2 launch turtlebot3_stereo_sim turtlebot3_stereo_world.launch.py
-```
-
-別ターミナルから keyboard teleoperation を起動する:
-
-```bash
-docker compose -f docker/docker-compose.yml run --rm sim ros2 run turtlebot3_teleop teleop_keyboard
-```
-
-CycloneDDS は次の設定で使います。
-
-```bash
-RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
-CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
-```
-
 ## ディレクトリマップ
 
 ```text
 .
+|-- bringup.sh
 |-- docker/
 |   |-- Dockerfile
 |   |-- Dockerfile.dockerignore
@@ -271,9 +196,7 @@ CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
 |       `-- quick-start.gif
 |-- scripts/
 |   |-- build.sh
-|   |-- run-gazebo-gpu.sh
 |   |-- run-gazebo.sh
-|   |-- run-rviz-gpu.sh
 |   |-- run-rviz.sh
 |   `-- shell.sh
 |-- src/
@@ -293,14 +216,9 @@ CYCLONEDDS_URI=file:///etc/cyclonedds/cyclonedds.xml
 |           `-- cmd_vel_watchdog.py
 |-- .gitignore
 |-- LICENSE
+|-- requirement.txt
 `-- README.md
 ```
-
-## 補足
-
-- Docker image build 時に `aws-robotics/aws-robomaker-small-house-world` から AWS RoboMaker Small House World を clone します。
-- `./scripts/run-gazebo.sh` は CPU-only の software rendering で起動します。
-- `./scripts/run-gazebo-gpu.sh` は Docker Compose の GPU override を有効にして NVIDIA GPU rendering で起動します。
 
 ## ライセンス
 
