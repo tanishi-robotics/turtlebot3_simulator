@@ -370,12 +370,14 @@
       </collision>
     </link>
 
-    <link name="camera_link">
+    <link name="camera_link"/>
+
+    <link name="camera_depth_frame">
+      <pose>0.069 -0.037 0.107 0 0 0</pose>
       <sensor name="camera_depth" type="depth">
         <always_on>true</always_on>
         <visualize>false</visualize>
         <update_rate>10</update_rate>
-        <pose>0.064 -0.047 0.107 0 0 0</pose>
         <camera name="intel_realsense_r200_depth">
           <horizontal_fov>1.02974</horizontal_fov>
           <image>
@@ -422,7 +424,7 @@
       <pose>0.069 -0.047 0.107 0 0 0</pose>
       <sensor name="camera" type="camera">
         <always_on>true</always_on>
-        <visualize>true</visualize>
+        <visualize>false</visualize>
         <update_rate>10</update_rate>
         <camera name="intel_realsense_r200">
           <horizontal_fov>1.02974</horizontal_fov>
@@ -503,7 +505,7 @@
     <joint name="imu_joint" type="fixed">
       <parent>base_link</parent>
       <child>imu_link</child>
-      <pose>-0.032 0 0.068 0 0 0</pose>
+      <pose>0.0 0 0.068 0 0 0</pose>
       <axis>
         <xyz>0 0 1</xyz>
       </axis>
@@ -531,6 +533,15 @@
       <parent>camera_link</parent>
       <child>camera_rgb_frame</child>
       <pose>0.005 0.018 0.013 0 0 0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+      </axis>
+    </joint>
+
+    <joint name="camera_depth_joint" type="fixed">
+      <parent>camera_link</parent>
+      <child>camera_depth_frame</child>
+      <pose>0.005 0.028 0.013 0 0 0</pose>
       <axis>
         <xyz>0 0 1</xyz>
       </axis>
